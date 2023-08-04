@@ -1,9 +1,10 @@
 # Red Light Jumping Detection
 
-----
 ## Introduction
 
 ## Aim
+
+## Libraries and Technology Used
 
 ## TODO
     [ ] Setting up a database 

@@ -4,4 +4,5 @@ logging.basicConfig(level=logging.DEBUG, format=" %(levelname)-8s - %(name)s - %
 logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
-    logger.info("Starting")
+    logger.info("Starting..")
+

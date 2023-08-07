@@ -1,3 +1,5 @@
+# Settings variables and enums goes here
 
-# This file contains project settings variables, and paths
-# entire project can
+import logging
+logger = logging.getLogger(__name__)
+

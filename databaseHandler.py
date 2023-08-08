@@ -1,8 +1,10 @@
-# Database handlers goes here
 
 import logging
-import pymongo
-import datetime
+
+from pymongo import MongoClient
+from typing import Union
+from pymongo.results import InsertOneResult, InsertManyResult
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,7 +23,7 @@ DBSettings: dict = {
 class RljdDBHandler:  # Improve this class by creating new class to handle CRUD operations and use Composition
 
     def __init__(self):
-        self.client = pymongo.MongoClient(
+        self.client = MongoClient(
             host=DBSettings['host'],
             port=DBSettings['port'],
         )
@@ -36,20 +38,23 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
     def list_dbs(self) -> tuple:
         return tuple(self.client.list_database_names())
 
-    def insert(self, document: list[dict] | dict, collection: str) -> None:  # Create
+    def insert(self, document: list[dict] | dict, collection: str) -> Union[InsertOneResult, InsertManyResult]:
+        # Create
 
         if collection not in self.collection_list:
-            raise CollectionNotFoundError(f'collection "{collection}" does not exist in database {self.collection_list}')
+            raise CollectionNotFoundError(
+                f'collection "{collection}" does not exist in database {self.collection_list}'
+                )
 
         if isinstance(document, dict):
             collection = self.db[collection]
-            collection.insert_one(document)
             logger.info(f"Document successfully was inserted in {collection}")
+            return collection.insert_one(document)
 
         elif isinstance(document, list):
             collection = self.db[collection]
-            collection.insert_many(document)
             logger.info(f"Documents successfully were inserted in {collection}")
+            return collection.insert_many(document)
 
         else:
             raise TypeError(f"'{document}' is neither of type dict nor list of dict")
@@ -63,22 +68,4 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
 
 
 if __name__ == "__main__":
-    et = RljdDBHandler()
-
-    cl = [
-        {
-            'infringement_data': datetime.datetime.now(tz=datetime.timezone.utc),
-            'confidence': 100,
-            'is_valid': True,
-            'vehicle_id': None
-        },
-        {
-            'infringement_data': datetime.datetime.now(tz=datetime.timezone.utc),
-            'confidence': 10,
-            'is_valid': False,
-            'vehicle_id': None
-        },
-
-    ]
-    et.insert(cl, "infringement")
-
+    pass

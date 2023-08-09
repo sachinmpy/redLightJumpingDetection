@@ -63,7 +63,9 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
         pass
 
     def delete(self) -> None:
+        pass
 
+    def query(self, querystring):
         pass
 
 

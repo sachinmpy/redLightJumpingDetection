@@ -1,8 +1,14 @@
 import logging
-import RLJDGui as gui
+import settings
+import datetime
+import RLJDGui as GUI
 
-logging.basicConfig(level=logging.DEBUG, format=" [%(levelname) -8s] - %(name)s - %(message)s", )
+from databaseHandler import RljdDBHandler
+
+logging.basicConfig(level=logging.DEBUG, format=" [ %(levelname)s ] - %(name)s - %(message)s", )
 logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
+
+    db: RljdDBHandler = RljdDBHandler(settings.DBSettings, 'infringement')
     logger.info("Starting..")

@@ -68,6 +68,3 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
     def query(self, querystring):
         pass
 
-
-if __name__ == "__main__":
-    pass

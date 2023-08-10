@@ -1,10 +1,11 @@
-
 import logging
 
 from pymongo import MongoClient
-from typing import Union
+from typing import Union, List, Dict
 from pymongo.results import InsertOneResult, InsertManyResult
 from pymongo.collection import Collection
+from pymongo.cursor import Cursor
+from pymongo.results import DeleteResult
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
             port=dbsettings['port'],
         )
         self.db = self.client[dbsettings['database']]
-        logger.info(f"Using DATABASE: {self.db}")
+        logger.info(f"Using database: {self.db.name}")
 
         self.collection_list = tuple(self.db.list_collection_names())
         self.current_collection: Collection = self.set_collection(collection_name)
@@ -39,7 +40,7 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
     def get_current_collection(self) -> Collection:
         return self.current_collection
 
-    def ping(self):     # Complete this
+    def ping(self):  # Complete this
         return self.client.server_info()["ok"]
 
     def list_dbs(self) -> tuple:
@@ -62,9 +63,8 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
     def update(self) -> None:
         pass
 
-    def delete(self) -> None:
-        pass
+    def delete_record(self, deletefilter: Dict) -> DeleteResult:
+        return self.current_collection.delete_many(deletefilter)
 
-    def query(self, querystring):
-        pass
-
+    def query(self, querydictionary) -> Cursor:
+        return self.current_collection.find(querydictionary)

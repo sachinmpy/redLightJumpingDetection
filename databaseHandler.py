@@ -7,11 +7,11 @@ from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from pymongo.results import DeleteResult
 
+from exceptions import CollectionNotFoundError
+
 logger = logging.getLogger(__name__)
 
 
-class CollectionNotFoundError(Exception):  # Move this class to its own module
-    pass
 
 
 class RljdDBHandler:  # Improve this class by creating new class to handle CRUD operations and use Composition

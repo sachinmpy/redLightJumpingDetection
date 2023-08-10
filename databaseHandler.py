@@ -66,5 +66,8 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
     def delete_record(self, deletefilter: Dict) -> DeleteResult:
         return self.current_collection.delete_many(deletefilter)
 
-    def query(self, querydictionary) -> Cursor:
+    def query(self, querydictionary: Dict) -> Cursor:
         return self.current_collection.find(querydictionary)
+
+    def query_all(self) -> Cursor:
+        return self.query(querydictionary={})

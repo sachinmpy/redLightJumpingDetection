@@ -1,0 +1,111 @@
+{% extends 'navbar.html' %}
+
+{% block body %}
+    <div class="border border-0 border-dark mt-3 p-2" style="background-color: #222734;">
+        <h1 class="ml-2">Generate Report </h1>
+
+    </div>
+
+    <div class="border border-0 border-dark mt-3 p-2" style="background-color: #ffd9d9;">
+
+        <p class="ml-2 p-3 fs-4">
+            Generate Report on the basis of following filter
+            A <strong>PDF</strong> file will be generated and downloaded.
+        </p>
+    </div>
+
+
+    <div class="border border-0 border-dark mt-3 p-3" style="background-color: #b2f1ff;">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="col">
+
+            <div class="card border-0 border-primary shadow-1 ">
+              <div class="card-header">"""Daily Reports"""</div>
+              <div class="card-body">
+                <h5 class="card-title">Daily Reports</h5>
+                <p class="card-text">
+                    Generate Report of last 24 hrs. All infringement recorded in last 24 hrs will be used in the report
+                </p>
+
+                <button type="button" class="btn btn-primary">Generate</button>
+              </div>
+            </div>
+            </div>
+
+            <div class="col">
+
+                <div class="card border-0 border-primary shadow-0 ">
+                  <div class="card-header">"""Daily Reports"""</div>
+                  <div class="card-body">
+                    <h5 class="card-title">Weekly Report</h5>
+                    <p class="card-text">
+                        Generate Report of last 7 days. Could take few seconds to generate
+                    </p>
+
+                    <button type="button" class="btn btn-primary">Generate</button>
+                  </div>
+            </div>
+
+            </div>
+
+            <div class="col">
+
+                <div class="card border-0 border-primary shadow-0 ">
+                  <div class="card-header">"""Daily Reports"""</div>
+                  <div class="card-body">
+                    <h5 class="card-title">Monthly Report</h5>
+                    <p class="card-text">
+                        Generate Report of last 30 days. This is a slow process and can take few mins
+                    </p>
+
+                    <button type="button" class="btn btn-primary">Generate</button>
+                  </div>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+       <div class="border border-0 border-dark mt-3 p-2" style="background-color: #ffd9d9;">
+
+            <p class="ms-2 p-3 fs-4">
+                Generate Report of Specific Day or time range
+            </p>
+
+        </div>
+
+       <div class="border border-0 border-dark mt-3 p-2" style="background-color: #b2f1ff;">
+           <form action="{{ url_for('generate_specific_date_report') }}" method="post">
+               {{ sd_form.csrf_token }}
+               <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Generate Report of Specific Date</h5>
+                       <label> Pick A Specific Date: </label> <div style="width: 100%">{{sd_form.datefield}} </div>
+                    <p class="card-text"></p>
+                      <input type="submit" value="Generate" class="btn btn-primary">
+                  </div>
+                </div>
+           </form>
+
+
+
+           <form action="{{ url_for('generate_specific_date_range_report') }}" method="post">
+               {{ dr_form.csrf_token }}
+               <div class="card mt-3">
+                  <div class="card-body">
+                    <h5 class="card-title">Generate Report of Specific Date Range</h5>
+                      <label> Pick A Start Date: </label> <div style="width: 100%">{{dr_form.start_date}} </div>
+                      <label> Pick A End Date: </label> <div style="width: 100%">{{dr_form.end_date}} </div>
+
+                    <p class="card-text"></p>
+                      <input type="submit" value="Generate" class="btn btn-primary">
+                  </div>
+                </div>
+           </form
+
+       </div>
+
+
+
+
+{% endblock %}

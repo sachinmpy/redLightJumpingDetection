@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block navbar %}
+<header>
+    <!-- Sidebar -->
+    <nav id="sidebarMenu" class="collapse d-lg-block sidebar box-style collapse bg-white">
+        <div class="position-sticky">
+        <div class="list-group list-group-flush mx-3 mt-4">
+            <a
+            href="http://localhost:5000/"
+            class="list-group-item list-group-item-action py-2 "
+            aria-current="true"
+            >
+              <i class="fa-solid fa-house me-3"></i><span>Home</span>
+
+            </a>
+
+          <h5 class="list-group-item py-2 mt-5">Navigate</h5>
+
+
+            <a
+            href="http://localhost:5000/control-panel"
+            class="list-group-item list-group-item-action py-2 "
+            aria-current="true"
+            >
+            <i class="fa-sharp fa-solid fa-newspaper me-3"></i><span>Control Panel</span>
+
+            </a>
+            <a
+            href="http://localhost:5000/review-media"
+            class="list-group-item list-group-item-action py-2 "
+            aria-current="true"
+            >
+            <i class="fa-solid fa-comment me-3"></i></i><span>Review Media</span>
+            </a>
+            
+            <a
+            href="http://localhost:5000/generate-report"
+            class="list-group-item list-group-item-action py-2 "
+            aria-current="true"
+            >          
+            <i class="fa-sharp fa-solid fa-file-zipper me-3"></i><span>Generate Report</span>
+
+            </a>
+        </div>
+        </div>
+    </nav>
+    <!-- Sidebar -->
+</header>
+{% endblock %}

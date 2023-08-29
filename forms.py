@@ -16,11 +16,11 @@ class SpecificDateRangeForm(FlaskForm):
 
 
 class VideoUploadForm(FlaskForm):
-    # file_import = FileField(validators=[InputRequired()])
-    # file_date = DateField(validators=[InputRequired()])
-    # file_time = TimeField(validators=[InputRequired()])
+    file_import = FileField(validators=[InputRequired()])
+    file_date = DateField(validators=[InputRequired()])
+    file_time = TimeField(validators=[InputRequired()])
 
-    file_import = FileField()
-    file_date = DateField()
-    file_time = TimeField()
+    # file_import = FileField()
+    # file_date = DateField()
+    # file_time = TimeField()
 

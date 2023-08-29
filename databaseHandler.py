@@ -60,7 +60,7 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
         else:
             raise TypeError(f"'{document}' is neither of type dict nor list of dict")
 
-    def update(self) -> None:
+    def update(self) -> None:  # TODO: Not implemented
         pass
 
     def delete_record(self, deletefilter: Dict) -> DeleteResult:

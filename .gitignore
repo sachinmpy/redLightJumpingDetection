@@ -2,4 +2,6 @@ venv/*
 .gitignore
 AIModels/*
 .idea/*
-static/images/*
+static/*
+temp_frame/*
+videofiles/*

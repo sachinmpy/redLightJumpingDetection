@@ -1,6 +1,6 @@
 import logging
 from flask_wtf import FlaskForm
-from wtforms import DateField, FileField, TimeField
+from wtforms import DateField, FileField, TimeField, StringField, HiddenField
 from wtforms.validators import InputRequired
 
 logger = logging.getLogger(__name__)
@@ -23,4 +23,9 @@ class VideoUploadForm(FlaskForm):
     # file_import = FileField()
     # file_date = DateField()
     # file_time = TimeField()
+
+
+class CoordinatesForm(FlaskForm):
+    first_coords = HiddenField()
+    second_coords = HiddenField()
 

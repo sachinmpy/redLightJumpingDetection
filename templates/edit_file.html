@@ -10,7 +10,17 @@
             <div class="m-3 p-2">
                 <a href="{{ url_for('review_media', file_upload=False) }}" class="box-button m-3" style="background-color: #ffb2b2"> Cancel </a>
                 <a href="#" onclick="myClear()" class="box-button me-3" style="background-color: #ffffc7">Clear</a>
-                <a href="" class="box-button" style="background-color: #cdffbe"> Start </a>
+
+                <form action="{{ url_for('processing', file_metadata=file_metadata) }}" method="post" class="m-3">
+                    {{hidden_form.csrf_token}}
+                    {{hidden_form.first_coords(id_='first_coords')}}
+                    {{hidden_form.second_coords(id_='second_coords')}}
+
+<!--                    <input type="text" name="coordinates" id="coordinates" hidden />-->
+<!--                    <input type="text" name="metadata" id="metadata" hidden />-->
+                    <button type="submit" class="box-button" style="background-color: #cdffbe">Start</button>
+                </form>
+<!--                <a href="#" onclick="startProcessing()" class="box-button" style="background-color: #cdffbe"> Start </a>-->
             </div>
         </div>
     <!--            <img src="/static/images/image_1.jpg" alt="Image Not Found" id="frameImage">-->
@@ -107,6 +117,7 @@ for(var i=0; i<elmids.length; i++) {
       count = count + 1;
       document.getElementById('regcoords').value = x+ ' , ' +y;
 
+
         if (count < 2) {
 
             context.fillStyle = "red";
@@ -114,7 +125,7 @@ for(var i=0; i<elmids.length; i++) {
 
             context.fillRect(x, y, 5, 5);
             myCords[count] = [x, y];
-            // console.log(myCords)
+            console.log(myCords)
             if (count == 1){
                 context.beginPath();
                 console.log("HI");
@@ -125,12 +136,21 @@ for(var i=0; i<elmids.length; i++) {
                 context.stroke();
             }
         }
+
+
+        if (count == 0){
+            document.getElementById('first_coords').value = myCords[0];
+        }
+
+        if (count == 1) {
+            document.getElementById('second_coords').value = myCords[1];
+        }
+
         }
 
     }
 
 }
-
 </script>
 
 

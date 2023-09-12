@@ -4,17 +4,18 @@ import os
 import random
 import logging
 
+import numpy
 from numpy import ndarray
-
+from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
 class Video:
 
-    def __init__(self, url_path: str, metadata: dict) -> None:
+    def __init__(self, url_path: Path, metadata: dict) -> None:
         self.metadata = metadata
         self.url_path = url_path
-        self.video_obj = cv2.VideoCapture(self.url_path)
+        self.video_obj = cv2.VideoCapture(str(self.url_path))
         self.total_frames = self.video_obj.get(cv2.CAP_PROP_FRAME_COUNT)
         self.fps = self.video_obj.get(cv2.CAP_PROP_FPS)
 
@@ -41,8 +42,8 @@ class Video:
                 else:
                     step_count = 1
 
-                time.sleep(1 / self.fps) if not sleep_off else time.sleep(0)
-                frame_list.append(frame)
+                # time.sleep(1 / self.fps) if not sleep_off else time.sleep(0)
+                frame_list.append(cv2.resize(frame, (800, 500)))
                 # cv2.imshow('frame', frame)
                 cv2.waitKey(1)
 
@@ -55,13 +56,15 @@ class Video:
         return frame_list
 
     def get_first_frame(self) -> ndarray:
+
         frame = self.read_frames(frame_count=1)[0]
+
         # cv2.imshow("My IMage", frame)
         # cv2.waitKey(1)
         return frame
 
     @staticmethod
-    def save_to_image(frame: ndarray, folder_path: str, metadata: dict, extension: str = '.jpeg') -> None:
+    def save_to_image(frame: ndarray, folder_path: str, metadata: dict, extension: str = '.jpeg') -> str | None:
         try:
             os.chdir(folder_path)
 
@@ -69,10 +72,11 @@ class Video:
             logger.error("FileNotFound, Path specified does not exist, check path and try again")
             return None
 
-        filename = metadata['filename'] + "".join(random.choices("abcdefgh01234", k=4)) + extension
+        filename = metadata['file_name'] + "".join(random.choices("abcdefgh01234", k=4)) + extension
+        file_location = f"/static/unhandled_images/{filename}"
         cv2.imwrite(filename, frame)
         logger.info("File saved successfully")
-
+        return file_location
 
 if __name__ == "__main__":
     # url = "C:\\Users\\smath\\PycharmProjects\\redLightJumpingDetection\\videofiles\\unhandled\\bha.mp4"

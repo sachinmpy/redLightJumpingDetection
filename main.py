@@ -4,18 +4,28 @@ import cv2
 
 from flask import Flask, render_template, url_for, request, redirect
 from werkzeug.utils import secure_filename
-from tools.videoprocessing import Video
-
-from forms import SpecificDateForm, SpecificDateRangeForm, VideoUploadForm
+from tools.detectionengine import *
+from databaseHandler import RljdDBHandler
+from forms import SpecificDateForm, SpecificDateRangeForm, VideoUploadForm, CoordinatesForm
 
 app = Flask(__name__, static_url_path="/static")
 app.config['SECRET_KEY'] = "ksdjfalkasjws22KSJDLKa"
 
 UPLOAD_FOLDER = "videofiles/unhandled"
+IMAGE_FOLDER = "static/unhandled_images"
+
 
 logging.basicConfig(level=logging.DEBUG, format=" [ %(levelname)s ] - %(name)s - %(message)s", )
 logger = logging.getLogger(__name__)
 
+
+db_settings: dict = {
+    'host': 'localhost',
+    'port': 27017,
+    'database': 'red-light-jumping-detection'
+}
+
+db: RljdDBHandler = RljdDBHandler(db_settings, 'infringement')
 
 @app.route("/")
 def home():
@@ -47,16 +57,53 @@ def review_media():
 
 
 @app.route("/review-media/edit/<file_metadata>", methods=['GET', 'POST'])
-def edit_media(file_metadata: dict):
+def edit_media(file_metadata: str):
     image_url: str = "/static/images/image_1.jpg"
-    metadata = file_metadata
-    file_url = UPLOAD_FOLDER + "/" + metadata["file_name"]
+    parse_metadata = file_metadata.split(',')
+    hidden_form = CoordinatesForm()
 
-    # video: Video = Video(file_url)
+    metadata = {
+        'file_name': parse_metadata[0],
+        'file_date': parse_metadata[1],
+        'file_time': parse_metadata[2]
 
-    # metadata['first_frame'] = video.get_first_frame()
+    }
+    file_url = UPLOAD_FOLDER + "/" + metadata['file_name']
     logger.debug(metadata)
-    return render_template("edit_file.html", image_url=image_url)
+    video: Video = Video(file_url, metadata)
+
+    metadata['first_frame'] = Video.save_to_image(video.get_first_frame(), IMAGE_FOLDER, metadata)
+
+    image_url = metadata['first_frame']
+    logger.debug(metadata)
+    return render_template("edit_file.html", image_url=image_url, file_metadata=file_metadata, hidden_form=hidden_form)
+
+
+@app.route("/review-media/processing/<file_metadata>", methods=["POST"])
+def processing(file_metadata):
+    parsed_data = file_metadata.split(',')
+    metadata = {
+        'file_name': parsed_data[0],
+        'file_date': parsed_data[1],
+        'file_time': parsed_data[2],
+        'f_coords': tuple(request.form['first_coords'].split(',')),
+        's_coords': tuple(request.form['second_coords'].split(','))
+    }
+
+    p1 = Point(int(metadata['f_coords'][0]), int(metadata['f_coords'][1]))
+    p2 = Point(int(metadata['s_coords'][0]), int(metadata['s_coords'][1]))
+
+    print(metadata['file_name'])
+
+    de: DetectionEngine = DetectionEngine(Path(rf"C:\Users\smath\PycharmProjects\redLightJumpingDetection\videofiles\unhandled\{metadata['file_name']}"), Path(''), 24)
+    line: Line = Line(p1, p2)
+    frames: list[Frame] = de.process_frames(line, '')
+    de.construct_video(frames)
+    de.write_to_db(frames, metadata['file_name'], metadata['file_date'], metadata['file_time'])
+
+    logger.debug(metadata)
+
+    return render_template("processing_final.html", metadata=metadata)
 
 
 @app.route("/generate-report")
@@ -72,6 +119,23 @@ def generate_report():
 @app.route("/generate-report/generate-specific-day-report/", methods=["POST", "GET"])
 def generate_specific_date_report():
     form: SpecificDateForm = SpecificDateForm()
+    date = request.form['datefield']
+    if date:
+        q = {
+            'file_date': date,
+        }
+        cursor = db.query(
+            q
+        )
+
+        total_infringements = 0
+        for record in cursor:
+            total_infringements += 1
+            logger.debug(record)
+
+        report_string = f'{date}'
+        return render_template('report.html', total_infringements=total_infringements, report_string=report_string)
+
     # if form.validate():
     logger.debug(request.form["datefield"])
     return redirect(url_for('generate_report'))
@@ -80,6 +144,26 @@ def generate_specific_date_report():
 @app.route("/generate-report/generate-specific-day-range-report/", methods=["POST", "GET"])
 def generate_specific_date_range_report():
     # form: SpecificDateRangeForm = SpecificDateRangeForm()
+    start = request.form['start_date']
+    end = request.form['end_date']
+
+    if start and end:
+        q = {
+            'file_date': {
+                '$gte': start,
+                '$lte': end
+            }
+        }
+        cursor = db.query(q)
+
+        total_infringements = 0
+        for record in cursor:
+            total_infringements += 1
+
+        report_string = f"{start} - {end}"
+
+        return render_template('report.html', total_infringements=total_infringements, report_string=report_string)
+
     logger.debug(request.form["start_date"])
     logger.debug(request.form["end_date"])
 
@@ -97,8 +181,18 @@ def get_uploaded_video():
         file = request.files['file_import']
         file_name = secure_filename(file.filename)
         file_metadata["file_name"] = file_name
-        # file.save(os.path.join(UPLOAD_FOLDER, file_name))
-        return edit_media(file_metadata=file_metadata)
+        metadata = f"{file_metadata['file_name']},{file_metadata['file_date']},{file_metadata['file_time']}"
+        os.chdir("C:\\Users\\smath\\PycharmProjects\\redLightJumpingDetection")  # TODO: make it dynamic
+
+        if not os.path.exists(UPLOAD_FOLDER + "/" + file_name):
+            try:
+                file.save(UPLOAD_FOLDER + '/' + file_name)
+
+            except FileNotFoundError:
+                logger.debug("_________ FILE NOT FOUND _____________")
+                return redirect((url_for("review_media")))
+
+        return redirect(url_for("edit_media", file_metadata=metadata))
 
     logger.debug(request.form)
     return redirect(url_for('review_media'))

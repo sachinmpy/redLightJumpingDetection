@@ -1,0 +1,30 @@
+{% extends 'navbar.html' %}
+{% block body %}
+
+<div class="box-border">
+
+    <div class="box-style m-3 p-2" style="background-color: #fff">
+        <h1 class="ml-2">Processing Finished</h1>
+    </div>
+
+    <div class="box-border m-3" style="background-color: #fff">
+
+        <div class="fs-4 p-2" style="background-color: #ffd9d9;">
+            Video : {{metadata['file_name']}} Has been saved and processed
+            <br>
+            You can find that processed video in a folder specified
+        </div>
+
+        <div class="box-border-side mt" style="background-color: #b2f1ff;">
+
+            <div class="fs-4 p-2" style="background-color: #fffed9;">
+                Database Stats: <br>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'navbar.html' %}
+
+{% block body %}
+<div class="box-border">
+
+<!--    Page Header -->
+    <div class="box-style m-3 p-2" style="background-color: #fff">
+        <h1 class="ml-2">Review Media</h1>
+    </div>
+    <div class="box-border m-3" style="background-color: #fff">
+
+        <div class="" style="background-color: #ffd9d9;">
+
+            <div class=" p-1 fs-3 text-center box-border-side">
+                <b>Upload a Video to process it <br>
+                Supported Video types are - .mkv, .avi
+                </b>
+            </div>
+
+        </div>
+
+<!--        Upload Form-->
+        <div class="box-border-bottom p-3" style="background-color: #b2f1ff">
+
+            <form action="{{ url_for('get_uploaded_video') }}" method="post" class="d-flex justify-content-center" enctype="multipart/form-data">
+                <div class="card box-style" style="width: 30%">
+                    <div class="card-header rounded-0" style="background-color: #cdffbe">
+                        <h5 class="card-title fs-3">Upload a file</h5>
+                    </div>
+                    <div class="card-body ">
+                        <p class="card-text">
+                            {{ video_form.csrf_token }}
+                            {{ video_form.file_import(class_="p-2 m-2") }}
+                            {{ video_form.file_date(class_="p-2 m-2") }} <label> File Date </label>
+                            <br>
+                            {{ video_form.file_time(class_="p-2 m-2") }} <label> File Time </label>
+                        </p>
+                        <input type="submit" value="Upload" class="box-button ml-2 p-2">
+                    </div>
+                    <div class="card-footer rounded-0" style="background-color: #cdffbe">
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

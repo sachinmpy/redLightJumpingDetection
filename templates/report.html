@@ -1,0 +1,31 @@
+{% extends 'navbar.html' %}
+{% block body %}
+
+<div class="box-border">
+    <div class="box-style m-3 p-2" style="background-color: #fff">
+        <h1 class="ml-2">Report</h1>
+    </div>
+
+    <div class="box-border m-3" style="background-color: #fff">
+
+        <div class="box-border-side" style="background-color: #fff9d9;">
+            <div class="fs-4 p-2">
+                Report for <i><u>{{report_string}}</u></i>
+            </div>
+
+            <hr>
+
+            <div class="fs-2 p-2">
+                Total Infringement: {{total_infringements}}
+            </div>
+
+        </div>
+
+
+
+
+    </div>
+
+</div>
+
+{% endblock %}

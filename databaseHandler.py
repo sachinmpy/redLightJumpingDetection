@@ -1,6 +1,8 @@
 import logging
 
 from pymongo import MongoClient
+
+# imports for Type hinting
 from typing import Union, List, Dict
 from pymongo.results import InsertOneResult, InsertManyResult
 from pymongo.collection import Collection
@@ -10,8 +12,6 @@ from pymongo.results import DeleteResult
 from exceptions import CollectionNotFoundError
 
 logger = logging.getLogger(__name__)
-
-
 
 
 class RljdDBHandler:  # Improve this class by creating new class to handle CRUD operations and use Composition
@@ -60,7 +60,7 @@ class RljdDBHandler:  # Improve this class by creating new class to handle CRUD 
         else:
             raise TypeError(f"'{document}' is neither of type dict nor list of dict")
 
-    def update(self) -> None:
+    def update(self) -> None:  # TODO: Not implemented
         pass
 
     def delete_record(self, deletefilter: Dict) -> DeleteResult:

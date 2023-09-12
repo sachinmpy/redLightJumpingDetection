@@ -1,0 +1,105 @@
+{% extends 'navbar.html' %}
+
+{% block body %}
+
+<div class="box-border">
+
+    <div class="box-style m-3 p-2" style="background-color: #fff">
+        <h1 class="ml-2">Generate Report </h1>
+    </div>
+
+    <div class="box-border m-3" style="background-color: #fff">
+
+        <div class="box-border-side" style="background-color: #ffd9d9;">
+            <div class="fs-4 p-2">
+                Generate Report using following <i>filters.</i>
+                A <strong>PDF</strong> file will be generated and downloaded.
+            </div>
+        </div>
+
+<!--        fixed Reports-->
+        <div class="box-border-side mt" style="background-color: #b2f1ff;">
+            <div class="row row-cols-1 row-cols-3 p-3">
+                <div class="col">
+                    <div class="card box-border" style="background-color: #efe9e7">
+                        <div class="card-header">Daily Reports</div>
+                        <div class="card-body">
+                            <h5 class="card-title">Daily Reports</h5>
+                            <p class="card-text">
+                                Generate Report of last 24 hrs. All infringement recorded in last 24 hrs will be used in the report
+                            </p>
+                            <button type="button" class="box-button">Generate</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card box-border"  style="background-color: #efe9e7">
+                        <div class="card-header">Weekly Reports</div>
+                        <div class="card-body">
+                            <h5 class="card-title">Weekly Report</h5>
+                            <p class="card-text">
+                                Generate Report of last 7 days. Could take few seconds to generate
+                            </p>
+
+                            <button type="button" class="box-button">Generate</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="card box-border" style="background-color: #efe9e7">
+                        <div class="card-header">Monthly Reports</div>
+                        <div class="card-body">
+                            <h5 class="card-title">Monthly Report</h5>
+                            <p class="card-text">
+                                Generate Report of last 30 days. This is a slow process and can take few minutes
+                            </p>
+                            <button type="button" class="box-button">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!--        Custom Reports Header-->
+        <div class="box-border-side" style="background-color: #ffd9d9;">
+
+                <div class="p-2 fs-4">
+                    Generate Report of <i> Specific Day or Specific Date range </i>
+                </div>
+
+            </div>
+<!--    Custom Reports-->
+        <div class="p-3" style="background-color: #b2f1ff;">
+            <div class="d-flex">
+                <form action="{{ url_for('generate_specific_date_report') }}" method="post">
+                    {{ sd_form.csrf_token }}
+                    <div class="card mr-3"  style="background-color: #efe9e7">
+                        <div class="card-body box-border">
+                            <h5 class="card-title">Generate Report of Specific Date</h5>
+                                <label> Pick A Specific Date: </label> <div style="width: 100%">{{sd_form.datefield}} </div>
+                                <br>
+                                <input type="submit" value="Generate" class="box-button">
+                        </div>
+                    </div>
+                </form>
+
+                <form action="{{ url_for('generate_specific_date_range_report') }}" method="post">
+                    {{ dr_form.csrf_token }}
+                    <div class="card"  style="background-color: #efe9e7">
+                        <div class="card-body box-border">
+                            <h5 class="card-title">Generate Report of Specific Date Range</h5>
+                                <label> Pick A Start Date: </label> <div style="width: 100%">{{dr_form.start_date}} </div>
+                                <label> Pick A End Date: </label> <div style="width: 100%">{{dr_form.end_date}} </div>
+                                <br>
+                                <input type="submit" value="Generate" class="box-button">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

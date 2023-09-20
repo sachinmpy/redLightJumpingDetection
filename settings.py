@@ -8,7 +8,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 # Project paths
-BASE_DIR = Path.cwd()
+BASE_DIR = Path(r'C:\Users\smath\PycharmProjects\redLightJumpingDetection')
 TEMP_DIR = Path.joinpath(BASE_DIR, "temp_dir")  # Data in the folder will be flushed regularly
 
 VIDEO_DIR = Path.joinpath(TEMP_DIR, 'videofiles')

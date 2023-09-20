@@ -19,10 +19,17 @@ class Line:
         return f"{self.point_1}, {self.point_2}"
 
 
-class Arithmetics:
+class Box:
     @staticmethod
-    def box_mid_point(box: tuple[int]) -> Point:
-        pass
+    def box_mid_point(points: list[int]) -> Point:
+        return Point(
+            (points[0] + points[2]) // 2,
+            (points[1] + points[3]) // 2,
+        )
+
+
+class Arithmetics:
+    pass
 
 
 if __name__ == "__main__":

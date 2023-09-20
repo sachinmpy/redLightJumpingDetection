@@ -11,125 +11,116 @@ from tools.videoprocessing import Video
 from numpy.typing import NDArray
 from databaseHandler import RljdDBHandler
 from pathlib import Path
+from settings import BASE_DIR
+from geometry import Point, Line, Box
 
-from dataclasses import dataclass
 import os
 
 logger = logging.getLogger(__name__)
 
 
-db_settings: dict = {
+db_settings: dict = {  # TODO: to be removed
     "host": "localhost",
     "port": 27017,
     "database": "red-light-jumping-detection",
 }
 
 
-def mid_point(box: list[int]) -> tuple[int, int]:
+def mid_point(box: list[int]) -> tuple[int, int]:  # TODO: to be removed
     return (box[0] + box[2]) // 2, (box[1] + box[3]) // 2
 
 
-class Point:
-    def __init__(self, x: float | int, y: int | float) -> None:
-        self.x = x
-        self.y = y
-
-    def __str__(self):
-        return f"{self.x, self.y}"
-
-    def get_vectors(self) -> tuple:
-        return self.x, self.y
-
-
-class Line:
-    def __init__(self, point_1: Point, point_2: Point):
-        self.point_1 = point_1
-        self.point_2 = point_2
-
-    def __str__(self):
-        return f"{self.point_1}, {self.point_2}"
-
-
-@dataclass
-class Car:
-    box: tuple
-
-
 class Frame:
+    # COLORS
+    RED = (0, 0, 255)
+    BLUE = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    PURPLE = (0, 0, 125)
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+
+    TOLERANCE = 0.5
+    RADIUS = 5
+
     def __init__(self, frame: NDArray, obj_list: list, line: Line):
         self.frame = frame
         self.obj_list = obj_list
         self.line = line
+        self.detected_points = []
+
+    def all_mid_points(self) -> tuple[Point]:
+        mid_points = []
+        for obj in self.obj_list:
+            if obj["name"] in ("car", "truck"):
+                mid_point: Point = Box.box_mid_point(obj["box_points"])
+                mid_points.append(mid_point)
+
+        return tuple(mid_points)
+
+    def place_mid_points(self):
+        for point in self.all_mid_points():
+            if is_point_on_line(self.line, point, tolerance=self.TOLERANCE):
+                cv2.circle(
+                    self.frame,
+                    point.get_vectors(),
+                    radius=self.RADIUS,
+                    color=self.WHITE,
+                    thickness=-1,
+                )
+                cv2.line(
+                    self.frame,
+                    self.line.point_1.get_vectors(),
+                    self.line.point_2.get_vectors(),
+                    color=self.RED,
+                    thickness=3,
+                )
+                self.detected_points.append(point)
+            else:
+                cv2.circle(
+                    self.frame,
+                    point.get_vectors(),
+                    radius=self.RADIUS,
+                    color=self.BLUE,
+                    thickness=-1,
+                )
 
 
 class DetectionEngine:
-    model_path: str = "AIModels/yolov3.pt"
+    model_path = Path.joinpath(BASE_DIR, "AIModels/yolov3.pt")
+    print(model_path)
+    FPS = 24
 
-    def __init__(
-        self, url: Path, output_url: Path, fps: int, log_process: bool = True
-    ) -> None:
+    detector: ObjectDetection = ObjectDetection()
+    detector.setModelTypeAsYOLOv3()
+    detector.setModelPath(model_path.as_posix())
+    detector.loadModel()
+
+    def __init__(self, url: Path) -> None:
         self.url = url
-        self.output_url = output_url
-        self.fps = fps
-        self.log_process = log_process
-        self.video: Video = Video(self.url, {})
+        self.video: Video = Video(self.url)
 
-        self.detector: ObjectDetection = ObjectDetection()
+    def get_frames_from_video(
+        self, frame_count: int = 100, step: int = 1
+    ) -> list[NDArray]:
+        return self.video.read_frames(frame_count, step)
 
-        self.detector.setModelTypeAsYOLOv3()  # TODO: Create class methods to set models
-        self.detector.setModelPath(
-            "C:\\Users\\smath\\PycharmProjects\\redLightJumpingDetection\\AIModels\\yolov3.pt"
-        )
-
-        self.detector.loadModel()
-        self.detector.useCPU()
-
-    def process_frames(
-        self, line_coords: Line, save_location: str, step: int = 1
-    ) -> list:
-        custom = self.detector.CustomObjects(car=True)
-        print("FRAME PROCESSING STARTS")
-        frames = self.video.read_frames(100, step=2)
-        print("TOTAL FRAMES: ", len(frames))
-        print("FRAME PROCESSING ENDS")
-
+    def detect_objects_from_frames(self, line_coords: Line) -> list[Frame]:
+        frames = self.get_frames_from_video()
         detected_frames = []
 
-        _time = []
-
-        count = 0
         for frame in frames:
-            count += 1
-            print(f"PROCESSED: {count / len(frames) * 100} %")
-
-            start = time.time()
-            # detection = self.detector.detectObjectsFromImage(
-            #     frame,
-            #     minimum_percentage_probability=50,
-            #     output_type="array"
-            # )
-
-            detection = self.detector.detectObjectsFromImage(
+            img, detection = self.detector.detectObjectsFromImage(
                 frame,
-                custom_objects=custom,
                 minimum_percentage_probability=50,
                 output_type="array",
             )
 
-            # detected_objects = detection[1]
-            # print(detection[0])
-            detected_frames.append(
-                Frame(detection[0], obj_list=detection[1], line=line_coords)
-            )
-            end = time.time()
-            _time.append((end - start) * 10**3)
-            # print(detected_objects)
-            # detected_frames.append(detection[0])
-        print(sum(_time) / count)
+            detected_frames.append(Frame(img, obj_list=detection, line=line_coords))
+
         return detected_frames
 
     @staticmethod
-    def write_to_db(
+    def write_to_db(  # TODO: this will go outside
         frames: list[Frame], file_name: str, file_date: str, file_time: str
     ):
         db: RljdDBHandler = RljdDBHandler(db_settings, collection_name="infringement")
@@ -233,7 +224,7 @@ def distance(point_a: Point, point_b: Point) -> float | int:
     return math.sqrt(ans)
 
 
-def is_point_on_line(line: Line, point: Point, tolerance: float | int) -> bool:
+def is_point_on_line(line: Line, point: Point, tolerance: float) -> bool:
     AB = distance(line.point_1, line.point_2)
     AC = distance(line.point_1, point)
     BC = distance(line.point_2, point)
@@ -280,21 +271,40 @@ def is_on_mid_point(frame: Frame, point_1: tuple, point_2: tuple):
     return False
 
 
-def place_mid_points(
-    frame: Frame, radius: int, color: tuple, point_1: tuple, point_2: tuple
-):
-    for box in frame.obj_list:
-        _mid_point = mid_point(box["box_points"])
-        _point = Point(_mid_point[0], _mid_point[1])
-        if is_point_on_line(
-            Line(Point(point_1[0], point_1[1]), Point(point_2[0], point_2[1])),
-            _point,
-            tolerance=0.5,
-        ):
-            # print("CALLED")
-            cv2.line(frame.frame, point_1, point_2, color=color, thickness=3)
+def place_mid_points(frame: Frame):
+    color = (255, 0, 0)
+    radius = 5
 
-        cv2.circle(frame.frame, _mid_point, 5, color=color, thickness=-1)
+    for point in frame.all_mid_points():
+        if is_point_on_line(frame.line, point, tolerance=0.5):
+            cv2.circle(
+                frame.frame,
+                point.get_vectors(),
+                radius,
+                color=(125, 125, 125),
+                thickness=-1,
+            )
+            cv2.line(
+                frame.frame,
+                frame.line.point_1.get_vectors(),
+                frame.line.point_2.get_vectors(),
+                color=(0, 0, 255),
+                thickness=3,
+            )
+        else:
+            cv2.circle(frame.frame, point.get_vectors(), radius, color, thickness=-1)
+    # for box in frame.obj_list:
+    #     _mid_point = mid_point(box["box_points"])
+    #     _point = Point(_mid_point[0], _mid_point[1])
+    #     if is_point_on_line(
+    #         Line(Point(point_1[0], point_1[1]), Point(point_2[0], point_2[1])),
+    #         _point,
+    #         tolerance=0.5,
+    #     ):
+    #         # print("CALLED")
+    #         cv2.line(frame.frame, point_1, point_2, color=color, thickness=3)
+    #
+    #     cv2.circle(frame.frame, _mid_point, 5, color=color, thickness=-1)
 
 
 def is_infringed(frame: Frame, point_1: tuple, point_2: tuple):
@@ -319,9 +329,12 @@ def delete_files_in_folder(folder_path: Path):
 
 
 def main():
-    url = Path(r"C:\Users\smath\PycharmProjects\redLightJumpingDetection\temp_frame")
-    delete_files_in_folder(url)
+    url: Path = Path(r"C:\Users\smath\OneDrive\Desktop\sample videos\vid_2.mp4")
+    de: DetectionEngine = DetectionEngine(url)
 
+    objects = de.detect_objects_from_frames(Line(Point(0, 0), Point(100, 100)))
+
+    print(objects)
 
 if __name__ == "__main__":
     main()

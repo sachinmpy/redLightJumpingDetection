@@ -12,39 +12,31 @@ logger = logging.getLogger(__name__)
 
 class Video:
 
-    def __init__(self, url_path: Path, metadata: dict) -> None:
-        self.metadata = metadata
+    def __init__(self, url_path: Path) -> None:
         self.url_path = url_path
-        self.video_obj = cv2.VideoCapture(str(self.url_path))
-        self.total_frames = self.video_obj.get(cv2.CAP_PROP_FRAME_COUNT)
-        self.fps = self.video_obj.get(cv2.CAP_PROP_FPS)
+        self.video_obj = cv2.VideoCapture(self.url_path.as_posix())
+        self.TOTAL_FRAMES = self.video_obj.get(cv2.CAP_PROP_FRAME_COUNT)
+        self.FPS = self.video_obj.get(cv2.CAP_PROP_FPS)
 
     def read_frames(self, frame_count: int | None = None,
                     step: int = 1,
-                    sleep_off: bool = False
                     ) -> list[ndarray]:
-        frame_count = self.total_frames if frame_count is None else frame_count
+        frame_count = self.TOTAL_FRAMES if frame_count is None else frame_count
         count, step_count = 0, 1
 
         frame_list = []
-        # print("TOTAL FRAME", self.total_frames)
         while self.video_obj.isOpened() and count < frame_count:
-
             count += 1
             _, frame = self.video_obj.read()
 
             if _:
-
                 if step_count != step:
                     step_count += 1
                     continue
 
                 else:
                     step_count = 1
-
-                # time.sleep(1 / self.fps) if not sleep_off else time.sleep(0)
-                frame_list.append(cv2.resize(frame, (800, 500)))
-                # cv2.imshow('frame', frame)
+                frame_list.append(cv2.resize(frame, (800, 500)))  # TODO: check this
                 cv2.waitKey(1)
 
             else:
@@ -52,30 +44,18 @@ class Video:
 
         self.video_obj.release()
         cv2.destroyAllWindows()
-        # print("STEPPED FRAME", len(frame_list))
         return frame_list
 
     def get_first_frame(self) -> ndarray:
-
         frame = self.read_frames(frame_count=1)[0]
-
-        # cv2.imshow("My IMage", frame)
-        # cv2.waitKey(1)
         return frame
 
     @staticmethod
-    def save_to_image(frame: ndarray, folder_path: str, metadata: dict, extension: str = '.jpeg') -> str | None:
-        try:
-            os.chdir(folder_path)
+    def save_as_image(frame: ndarray, folder_path: str, file_name: str, extension: str = '.jpeg') -> str | None:
+        filename = file_name + "".join(random.choices("abcdefgh01234", k=4)) + extension
+        file_location = Path.joinpath(folder_path, filename)
+        cv2.imwrite(file_location, frame)
 
-        except FileNotFoundError as e:
-            logger.error("FileNotFound, Path specified does not exist, check path and try again")
-            return None
-
-        filename = metadata['file_name'] + "".join(random.choices("abcdefgh01234", k=4)) + extension
-        file_location = f"/static/unhandled_images/{filename}"
-        cv2.imwrite(filename, frame)
-        logger.info("File saved successfully")
         return file_location
 
 if __name__ == "__main__":

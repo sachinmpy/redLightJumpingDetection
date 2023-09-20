@@ -76,7 +76,6 @@ def review_media():
 
 @app.route("/review-media/edit/<file_metadata>", methods=["GET", "POST"])
 def edit_media(file_metadata: str):
-    image_url: str = "/static/images/image_1.jpg"
     parse_metadata = file_metadata.split(",")
     hidden_form = CoordinatesForm()
 
@@ -85,18 +84,16 @@ def edit_media(file_metadata: str):
         "file_date": parse_metadata[1],
         "file_time": parse_metadata[2],
     }
-    file_url = UPLOAD_FOLDER + "/" + metadata["file_name"]
-    logger.debug(metadata)
-    video: Video = Video(file_url, metadata)
+    video_url = Path.joinpath(VIDEO_DIR, metadata["file_name"])
+    video: Video = Video(video_url)
 
-    metadata["first_frame"] = Video.save_to_image(
-        video.get_first_frame(), IMAGE_FOLDER, metadata
+    metadata["first_frame"] = Video.save_as_image(
+        video.get_first_frame(), TEMP_IMAGES, metadata['file_name']
     )
-
     image_url = metadata["first_frame"]
-    logger.debug(metadata)
+
     return render_template(
-        "edit_file.html",
+        'edit_file.html',
         image_url=image_url,
         file_metadata=file_metadata,
         hidden_form=hidden_form,

@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from databaseHandler import RljdDBHandler
 from pathlib import Path
 from settings import BASE_DIR
-from geometry import Point, Line, Box
+from .geometry import Point, Line, Box
 
 import os
 
